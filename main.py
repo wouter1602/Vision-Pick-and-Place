@@ -15,6 +15,8 @@ class Settings:
         self.DisplayOutput = False
         self.Verbose = False
         self.CaptureDevice = 0
+        self.EdgeDetectionType = 0
+        self.EdgeThreshold = 100
 
 
 class Video:
@@ -27,6 +29,12 @@ class Video:
         # frame = cv.flip(frame, 1)
         return frame
 
+    def edge_detection(self, s: Settings):
+        frame_ = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        frame_ = cv.blur(frame_, (1, 1))
+        frame_ = cv.Canny(frame_, 100, 100 * 3, 3)
+        return frame_
+
 
 if __name__ == '__main__':
     s = Settings()
@@ -35,6 +43,8 @@ if __name__ == '__main__':
     s.DisplayOutput = True
     s.Verbose = True
     s.CaptureDevice = 0
+    s.EdgeDetectionType = 0
+    s.EdgeThreshold = 100
 
     if s.Verbose == True:
         print("Test")
@@ -45,6 +55,7 @@ if __name__ == '__main__':
     while True:
 
         frame = cap.video()
+        frame = cap.edge_detection(frame)
 
         cv.imshow("frame", frame)
 
