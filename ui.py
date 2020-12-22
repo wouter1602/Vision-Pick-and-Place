@@ -21,5 +21,6 @@ class Ui:
             print('You entered ', self.values[0])
         return 0
 
-    def __del__(self):
+    def __del__(self) -> int:
         self.window.close()
+        return 0

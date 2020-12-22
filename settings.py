@@ -32,12 +32,6 @@ class Settings:
         self.use_test_image = self.__json_obj['use_test_image']
         self.test_image = self.__json_obj['test_image']
 
-    def __del__(self) -> int:
-        if self.update_json() != 0:
-            return -2
-        self.__json_obj = None
-        return 0
-
     def __create_json(self) -> int:
         self.__json_obj = {'display_output': False, 'verbose': False, 'capture_device': 0, 'edge_detection_type': 0,
                            'edge_threshold': 100, 'TCP_IP': '127.0.0.1', 'TCP_PORT': 5000, 'use_test_image': False,
@@ -71,3 +65,9 @@ class Settings:
                 print("Can't create \'settings.json\' file")
             return -2
         jsonFile.close()
+
+    def __del__(self) -> int:
+        if self.update_json() != 0:
+            return -2
+        self.__json_obj = None
+        return 0
