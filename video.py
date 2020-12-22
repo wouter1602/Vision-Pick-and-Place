@@ -15,7 +15,7 @@ class Video:
 
         self.grayscale = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
         self.blur = cv.blur(self.frame, (1, 1))
-        self.edge = cv.Canny(self.blur, s.edge_threshold, s.edge_threshold * 3, 3)
+        self.edge = cv.Canny(self.blur, s.edge_threshold_A, s.edge_threshold_B)
         self.lines = None
         self.video_lines = self.frame.copy()
 
@@ -35,7 +35,7 @@ class Video:
         # self.blur = cv.blur(self.frame, (1, 1))
 
         # self.edge = cv.Canny(self.blur, 100, 100 * 3, 3)
-        self.edge = cv.Canny(self.grayscale, s.edge_threshold, s.edge_threshold * 3, 3)
+        self.edge = cv.Canny(self.grayscale, s.edge_threshold_A, s.edge_threshold_B)
 
     def detect_lines(self, s: Settings):
         self.lines = cv.HoughLinesP(self.edge, 1, np.pi / 180, 60, np.array([]), 50, 5)

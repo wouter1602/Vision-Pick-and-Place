@@ -15,7 +15,7 @@ def main() -> None:
     s = Settings()
 
     if s.display_output:
-        win = Ui()
+        win = Ui(s)
     else:
         win = None
 
@@ -43,12 +43,12 @@ def main() -> None:
         if s.display_output:
             if win.update(s, cap) != 0:
                 break
-        cv.waitKey(1)
+        # cv.waitKey(1)
 
 
     # cv.waitKey(0)
 
-    cv.destroyAllWindows()
+    # cv.destroyAllWindows()
     if s.display_output:
         del win
     del s
