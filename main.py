@@ -5,29 +5,7 @@ import cv2 as cv
 import multiprocessing
 from dataclasses import dataclass
 import socket
-
-
-class Settings:
-    display_output: bool
-    verbose: bool
-    capture_device: int
-    edge_detection_type: int
-    edge_threshold: int
-    TCP_IP: str
-    TCP_PORT: int
-    use_test_image: bool
-    test_image: str
-
-    def __init__(self):
-        self.display_output = False
-        self.verbose = False
-        self.capture_device = 0
-        self.edge_detection_type = 0
-        self.edge_threshold = 100
-        self.TCP_IP = '127.0.0.1'
-        self.TCP_PORT = 5000
-        self.use_test_image = False
-        self.test_image = "Test_Img.jpg"
+from settings import Settings
 
 
 class Video:
@@ -39,25 +17,44 @@ class Video:
         else:
             self.__cap = cv.VideoCapture(s.capture_device)
 
-        self._, self.frame = self.__cap.read()
+        if s.use_test_image:
+            self.frame = self.__cap
+        else:
+            self._, self.frame = self.__cap.read()
+
         self.grayscale = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
         self.blur = cv.blur(self.frame, (1, 1))
         self.edge = cv.Canny(self.blur, 100, 100 * 3, 3)
+        self.lines = None
+        self.video_lines = self.frame.copy()
 
-    def __video(self):
-        self._, self.frame = self.__cap.read()
+    def __video(self, s: Settings):
+        if s.use_test_image:
+            self.frame = self.__cap
+        else:
+            self._, self.frame = self.__cap.read()
 
-    def video(self):
-        self.__video()
+    def video(self, s: Settings):
+        self.__video(s)
         return self.frame
 
     def edge_detection(self, s: Settings):
-        self.__video()
+        self.__video(s)
         self.grayscale = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
-        self.blur = cv.blur(self.frame, (1, 1))
+        # self.blur = cv.blur(self.frame, (1, 1))
 
-        self.edge = cv.Canny(self.blur, 100, 100 * 3, 3)
+        # self.edge = cv.Canny(self.blur, 100, 100 * 3, 3)
+        self.edge = cv.Canny(self.grayscale, 100, 100 * 3, 3)
         return self.edge
+
+    def detect_lines(self, s: Settings):
+        self.lines = cv.HoughLinesP(self.edge, 1, np.pi/180, 60, np.array([]), 50, 5)
+
+    def draw_lines(self, s: Settings):
+        self.video_lines = self.frame.copy()
+        for line in self.lines:
+            for x1, y1, x2, y2 in line:
+                cv.line(self.video_lines, (x1, y1), (x2, y2), (255, 0, 0), 3)
 
 
 def main() -> None:
@@ -66,7 +63,7 @@ def main() -> None:
     # Set settings
     s.display_output = True
     s.verbose = True
-    s.use_test_image = False
+    s.use_test_image = True
 
     s.capture_device = 0
     s.edge_detection_type = 0
@@ -80,18 +77,22 @@ def main() -> None:
     while True:
 
         edge = cap.edge_detection(s)
+        cap.detect_lines(s)
+        cap.draw_lines(s)
 
         if s.verbose:
             cv.imshow("Frame", cap.frame)
             cv.imshow("Grayscale", cap.grayscale)
             cv.imshow("Blur", cap.blur)
             cv.imshow("Edges", cap.edge)
+            cv.imshow("Frame /W Lines", cap.video_lines)
 
         key = cv.waitKey(1)
         if key == 27:  # Key 'S'
             break
     cv.waitKey(0)
     cv.destroyAllWindows()
+    del s
 
 
 if __name__ == '__main__':
