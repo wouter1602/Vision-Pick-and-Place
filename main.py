@@ -2,10 +2,12 @@
 
 import numpy as np
 import cv2 as cv
-import multiprocessing
-from dataclasses import dataclass
-import socket
+# import multiprocessing
+# from dataclasses import dataclass
+# import socket
+
 from settings import Settings
+from ui import Ui
 
 
 class Video:
@@ -44,8 +46,7 @@ class Video:
         # self.blur = cv.blur(self.frame, (1, 1))
 
         # self.edge = cv.Canny(self.blur, 100, 100 * 3, 3)
-        self.edge = cv.Canny(self.grayscale, 100, 100 * 3, 3)
-        return self.edge
+        self.edge = cv.Canny(self.grayscale, s.edge_threshold, s.edge_threshold * 3, 3)
 
     def detect_lines(self, s: Settings):
         self.lines = cv.HoughLinesP(self.edge, 1, np.pi/180, 60, np.array([]), 50, 5)
@@ -60,14 +61,7 @@ class Video:
 def main() -> None:
     s = Settings()
 
-    # Set settings
-    s.display_output = True
-    s.verbose = True
-    s.use_test_image = True
-
-    s.capture_device = 0
-    s.edge_detection_type = 0
-    s.edge_threshold = 100
+    win = Ui()
 
     if s.verbose:
         print("Test")
@@ -76,22 +70,27 @@ def main() -> None:
 
     while True:
 
-        edge = cap.edge_detection(s)
+        cap.edge_detection(s)
         cap.detect_lines(s)
         cap.draw_lines(s)
 
-        if s.verbose:
-            cv.imshow("Frame", cap.frame)
-            cv.imshow("Grayscale", cap.grayscale)
-            cv.imshow("Blur", cap.blur)
-            cv.imshow("Edges", cap.edge)
-            cv.imshow("Frame /W Lines", cap.video_lines)
+        # if s.verbose:
+        #     cv.imshow("Frame", cap.frame)
+        #     cv.imshow("Grayscale", cap.grayscale)
+        #     cv.imshow("Blur", cap.blur)
+        #     cv.imshow("Edges", cap.edge)
+        #     cv.imshow("Frame /W Lines", cap.video_lines)
 
-        key = cv.waitKey(1)
-        if key == 27:  # Key 'S'
+        # key = cv.waitKey(1)
+        # if key == 27:  # Key 'S'
+        #     break
+
+        if win.update(s) != 0:
             break
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+
+    # cv.waitKey(0)
+    # cv.destroyAllWindows()
+    del win
     del s
 
 
