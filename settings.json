@@ -3,10 +3,10 @@
     "verbose": true,
     "capture_device": "/dev/video0",
     "edge_detection_type": 0,
-    "edge_threshold_A": 100,
-    "edge_threshold_B": 100,
+    "edge_threshold_A": 87.0,
+    "edge_threshold_B": 168.0,
     "TCP_IP": "127.0.0.1",
     "TCP_PORT": 5000,
-    "use_test_image": false,
-    "test_image": "Test_Img.jpg"
+    "use_test_image": true,
+    "test_image": "Test_Img_Resized.jpg"
 }

@@ -7,7 +7,7 @@ class Video:
 
     def __init__(self, s: Settings):
         if s.use_test_image:
-            self._cap = cv.imread("Test_Img.jpg")
+            self._cap = cv.imread(s.test_image)
             self.frame = self._cap
         else:
             self._cap = cv.VideoCapture(s.capture_device)

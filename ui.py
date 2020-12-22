@@ -51,18 +51,20 @@ class Ui:
         s.edge_threshold_A = self._values['-CANNY SLIDER A-']
         s.edge_threshold_B = self._values['-CANNY SLIDER B-']
 
-        self._update_img(v)
+        self._update_img(s, v)
         return 0
 
-    def _update_img(self, v: Video):
+    def _update_img(self, s: Settings, v: Video):
+        width = 640
+        height = 480
         imgbytes_normal = cv.imencode('.png', v.frame)[1].tobytes()
         imgbytes_gray = cv.imencode('.png', v.grayscale)[1].tobytes()
         imgbytes_canny = cv.imencode('.png', v.edge)[1].tobytes()
         imgbytes_lines = cv.imencode('.png', v.video_lines)[1].tobytes()
-        self._window['-IMAGE NORMAL-'].update(data=imgbytes_normal, size=(640, 480))
-        self._window['-IMAGE GRAY-'].update(data=imgbytes_gray, size=(640, 480))
-        self._window['-IMAGE CANNY-'].update(data=imgbytes_canny, size=(640, 480))
-        self._window['-IMAGE LINES-'].update(data=imgbytes_lines, size=(640, 480))
+        self._window['-IMAGE NORMAL-'].update(data=imgbytes_normal, size=(width, height))
+        self._window['-IMAGE GRAY-'].update(data=imgbytes_gray, size=(width, height))
+        self._window['-IMAGE CANNY-'].update(data=imgbytes_canny, size=(width, height))
+        self._window['-IMAGE LINES-'].update(data=imgbytes_lines, size=(width, height))
 
     def __del__(self) -> int:
         self._window.close()

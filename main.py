@@ -45,6 +45,7 @@ def main() -> None:
                 break
         # cv.waitKey(1)
 
+    s.update_json()
 
     # cv.waitKey(0)
 
