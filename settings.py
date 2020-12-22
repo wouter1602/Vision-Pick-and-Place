@@ -29,6 +29,8 @@ class Settings:
         self.edge_detection_type = self._json_obj['edge_detection_type']
         self.edge_threshold_A = self._json_obj['edge_threshold_A']
         self.edge_threshold_B = self._json_obj['edge_threshold_B']
+        self.contour_threshold_A = self._json_obj['contour_threshold_A']
+        self.contour_threshold_B = self._json_obj['contour_threshold_B']
         self.TCP_IP = self._json_obj['TCP_IP']
         self.TCP_PORT = self._json_obj['TCP_PORT']
         self.use_test_image = self._json_obj['use_test_image']
@@ -42,6 +44,8 @@ class Settings:
             'edge_detection_type': 0,
             'edge_threshold_A': 100,
             'edge_threshold_B': 100,
+            'contour_threshold_A': 100,
+            'contour_threshold_B': 255,
             'TCP_IP': '127.0.0.1',
             'TCP_PORT': 5000,
             'use_test_image': False,
@@ -56,6 +60,8 @@ class Settings:
         self._json_obj['edge_detection_type'] = self.edge_detection_type
         self._json_obj['edge_threshold_A'] = self.edge_threshold_A
         self._json_obj['edge_threshold_B'] = self.edge_threshold_B
+        self._json_obj['contour_threshold_A'] = self.contour_threshold_A
+        self._json_obj['contour_threshold_B'] = self.contour_threshold_B
         self._json_obj['TCP_IP'] = self.TCP_IP
         self._json_obj['TCP_PORT'] = self.TCP_PORT
         self._json_obj['use_test_image'] = self.use_test_image

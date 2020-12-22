@@ -25,31 +25,15 @@ def main() -> None:
     cap = Video(s)
 
     while True:
+        cap.detect_objects(s)
 
-        cap.edge_detection(s)
-        cap.detect_lines(s)
-        cap.draw_lines(s)
+        cv.imshow("Contour", cap.video_lines)
 
-        # if s.verbose:
-        # cv.imshow("Frame", cap.frame)
-        # cv.imshow("Grayscale", cap.grayscale)
-        # cv.imshow("Blur", cap.blur)
-        # cv.imshow("Edges", cap.edge)
-        # cv.imshow("Frame /W Lines", cap.video_lines)
-
-        # key = cv.waitKey(1)
-        # if key == 27:  # Key 'S'
-        #      break
         if s.display_output:
             if win.update(s, cap) != 0:
                 break
-        # cv.waitKey(1)
-
+        cv.waitKey(1)
     s.update_json()
-
-    # cv.waitKey(0)
-
-    # cv.destroyAllWindows()
     if s.display_output:
         del win
     del s
