@@ -5,7 +5,7 @@ import json
 class Settings:
     display_output: bool
     verbose: bool
-    capture_device: int
+    capture_device: str
     edge_detection_type: int
     edge_threshold: int
     TCP_IP: str
@@ -33,18 +33,11 @@ class Settings:
         self.test_image = self.__json_obj['test_image']
 
     def __create_json(self) -> int:
-        self.__json_obj = {'display_output': False, 'verbose': False, 'capture_device': 0, 'edge_detection_type': 0,
+        self.__json_obj = {'display_output': False, 'verbose': False, 'capture_device': "/dev/video1", 'edge_detection_type': 0,
                            'edge_threshold': 100, 'TCP_IP': '127.0.0.1', 'TCP_PORT': 5000, 'use_test_image': False,
                            'test_image': "Test_Img.jpg"}
 
-        try:
-            with open('./settings.json', 'w') as jsonFile:
-                json.dump(self.__json_obj, jsonFile)
-        except OSError:
-            print("Can't create \'settings.json\' file")
-            return -1
-        jsonFile.close()
-        return 0
+        return self.update_json()
 
     def update_json(self) -> int:
         self.__json_obj['display_output'] = self.display_output
@@ -59,12 +52,12 @@ class Settings:
 
         try:
             with open('./settings.json', 'w') as jsonFile:
-                json.dump(self.__json_obj, jsonFile)
+                json.dump(self.__json_obj, jsonFile, indent=4)
         except OSError:
             if self.verbose:
                 print("Can't create \'settings.json\' file")
             return -2
-        jsonFile.close()
+        return 0
 
     def __del__(self) -> int:
         if self.update_json() != 0:
