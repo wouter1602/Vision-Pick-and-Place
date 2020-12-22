@@ -4,63 +4,95 @@ import numpy as np
 import cv2 as cv
 import multiprocessing
 from dataclasses import dataclass
+import socket
 
 
 class Settings:
-    DisplayOutput: bool
-    Verbose: bool
-    CaptureDevice: int
+    display_output: bool
+    verbose: bool
+    capture_device: int
+    edge_detection_type: int
+    edge_threshold: int
+    TCP_IP: str
+    TCP_PORT: int
+    use_test_image: bool
+    test_image: str
 
     def __init__(self):
-        self.DisplayOutput = False
-        self.Verbose = False
-        self.CaptureDevice = 0
-        self.EdgeDetectionType = 0
-        self.EdgeThreshold = 100
+        self.display_output = False
+        self.verbose = False
+        self.capture_device = 0
+        self.edge_detection_type = 0
+        self.edge_threshold = 100
+        self.TCP_IP = '127.0.0.1'
+        self.TCP_PORT = 5000
+        self.use_test_image = False
+        self.test_image = "Test_Img.jpg"
 
 
 class Video:
 
-    def __init__(self, captureDevice: int = 0):
-        self.__cap = cv.VideoCapture(captureDevice)
+    def __init__(self, s: Settings):
+        if s.use_test_image:
+            self.__cap = cv.imread("Test_Img.jpg")
+
+        else:
+            self.__cap = cv.VideoCapture(s.capture_device)
+
+        self._, self.frame = self.__cap.read()
+        self.grayscale = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
+        self.blur = cv.blur(self.frame, (1, 1))
+        self.edge = cv.Canny(self.blur, 100, 100 * 3, 3)
+
+    def __video(self):
+        self._, self.frame = self.__cap.read()
 
     def video(self):
-        _, frame = self.__cap.read()
-        # frame = cv.flip(frame, 1)
-        return frame
+        self.__video()
+        return self.frame
 
     def edge_detection(self, s: Settings):
-        frame_ = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        frame_ = cv.blur(frame_, (1, 1))
-        frame_ = cv.Canny(frame_, 100, 100 * 3, 3)
-        return frame_
+        self.__video()
+        self.grayscale = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
+        self.blur = cv.blur(self.frame, (1, 1))
+
+        self.edge = cv.Canny(self.blur, 100, 100 * 3, 3)
+        return self.edge
 
 
-if __name__ == '__main__':
+def main() -> None:
     s = Settings()
 
     # Set settings
-    s.DisplayOutput = True
-    s.Verbose = True
-    s.CaptureDevice = 0
-    s.EdgeDetectionType = 0
-    s.EdgeThreshold = 100
+    s.display_output = True
+    s.verbose = True
+    s.use_test_image = False
 
-    if s.Verbose == True:
+    s.capture_device = 0
+    s.edge_detection_type = 0
+    s.edge_threshold = 100
+
+    if s.verbose:
         print("Test")
 
-    cap = Video(s.CaptureDevice)
-
+    cap = Video(s)
 
     while True:
 
-        frame = cap.video()
-        frame = cap.edge_detection(frame)
+        edge = cap.edge_detection(s)
 
-        cv.imshow("frame", frame)
+        if s.verbose:
+            cv.imshow("Frame", cap.frame)
+            cv.imshow("Grayscale", cap.grayscale)
+            cv.imshow("Blur", cap.blur)
+            cv.imshow("Edges", cap.edge)
 
         key = cv.waitKey(1)
         if key == 27:  # Key 'S'
             break
     cv.waitKey(0)
     cv.destroyAllWindows()
+
+
+if __name__ == '__main__':
+    main()
