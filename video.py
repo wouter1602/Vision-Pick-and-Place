@@ -73,11 +73,11 @@ class Video:
                 cv.putText(self.video_lines, "Circle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
 
     def detect_lines(self, s: Settings):
-        self.lines = cv.HoughLinesP(self.canny, 1, np.pi / 180, 60, np.array([]), 50, 5)
+        return cv.HoughLinesP(self.canny, 1, np.pi / 180, 60, np.array([]), 50, 5)
 
-    def draw_lines(self, s: Settings):
+    def draw_lines(self, s: Settings, lines):
         self.video_lines = self.frame.copy()
-        for line in self.lines:
+        for line in lines:
             for x1, y1, x2, y2 in line:
                 cv.line(self.video_lines, (x1, y1), (x2, y2), (255, 0, 0), 3)
 
@@ -86,9 +86,8 @@ class Video:
             self.edge_contour(s)
             self.draw_contour(s)
         else:
-            self.canny(s)
-            self.detect_lines(s)
-            self.draw_lines(s)
+            self.edge_canny(s)
+            # self.draw_lines(s, self.detect_lines(s))
 
     def __del__(self) -> int:
         # TODO: Create deconstruct

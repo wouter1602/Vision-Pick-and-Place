@@ -27,12 +27,12 @@ def main() -> None:
     while True:
         cap.detect_objects(s)
 
-        cv.imshow("Contour", cap.video_lines)
+        # cv.imshow("Contour", cap.video_lines)
 
         if s.display_output:
             if win.update(s, cap) != 0:
                 break
-        cv.waitKey(1)
+        # cv.waitKey(1)
     s.update_json()
     if s.display_output:
         del win
