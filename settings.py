@@ -7,8 +7,8 @@ class Settings:
     verbose: bool
     capture_device: str
     edge_detection_type: int
-    edge_threshold_A: int
-    edge_threshold_B: int
+    canny_threshold_A: int
+    canny_threshold_B: int
     TCP_IP: str
     TCP_PORT: int
     use_test_image: bool
@@ -27,10 +27,11 @@ class Settings:
         self.verbose = self._json_obj['verbose']
         self.capture_device = self._json_obj['capture_device']
         self.edge_detection_type = self._json_obj['edge_detection_type']
-        self.edge_threshold_A = self._json_obj['edge_threshold_A']
-        self.edge_threshold_B = self._json_obj['edge_threshold_B']
+        self.canny_threshold_A = self._json_obj['canny_threshold_A']
+        self.canny_threshold_B = self._json_obj['canny_threshold_B']
         self.contour_threshold_A = self._json_obj['contour_threshold_A']
         self.contour_threshold_B = self._json_obj['contour_threshold_B']
+        self.contour_poly_threshold = self._json_obj['contour_poly_threshold']
         self.TCP_IP = self._json_obj['TCP_IP']
         self.TCP_PORT = self._json_obj['TCP_PORT']
         self.use_test_image = self._json_obj['use_test_image']
@@ -42,10 +43,11 @@ class Settings:
             'verbose': False,
             'capture_device': "/dev/video1",
             'edge_detection_type': 0,
-            'edge_threshold_A': 100,
-            'edge_threshold_B': 100,
+            'canny_threshold_A': 100,
+            'canny_threshold_B': 100,
             'contour_threshold_A': 100,
             'contour_threshold_B': 255,
+            'contour_poly_threshold': 0.01,
             'TCP_IP': '127.0.0.1',
             'TCP_PORT': 5000,
             'use_test_image': False,
@@ -58,10 +60,11 @@ class Settings:
         self._json_obj['verbose'] = self.verbose
         self._json_obj['capture_device'] = self.capture_device
         self._json_obj['edge_detection_type'] = self.edge_detection_type
-        self._json_obj['edge_threshold_A'] = self.edge_threshold_A
-        self._json_obj['edge_threshold_B'] = self.edge_threshold_B
+        self._json_obj['canny_threshold_A'] = self.canny_threshold_A
+        self._json_obj['canny_threshold_B'] = self.canny_threshold_B
         self._json_obj['contour_threshold_A'] = self.contour_threshold_A
         self._json_obj['contour_threshold_B'] = self.contour_threshold_B
+        self._json_obj['contour_poly_threshold'] = self.contour_poly_threshold
         self._json_obj['TCP_IP'] = self.TCP_IP
         self._json_obj['TCP_PORT'] = self.TCP_PORT
         self._json_obj['use_test_image'] = self.use_test_image
