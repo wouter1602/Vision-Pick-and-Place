@@ -23,11 +23,12 @@ def main() -> None:
         print("Setup done, verbose is active")
 
     cap = Video(s)
-
+    cap.detect_objects(s)
     while True:
         # cap.detect_objects(s)
         cap.update_live_feed(s)
-        # cv.imshow("Contour", cap.video_lines)
+        if s.autodetect:
+            cap.detect_objects(s)
 
         if s.display_output:
             status_code = win.update(s, cap)
