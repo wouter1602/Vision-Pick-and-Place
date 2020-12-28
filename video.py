@@ -92,6 +92,9 @@ class Video:
             self._edge_canny(s)
             # self.draw_lines(s, self.detect_lines(s))
 
+    def update_live_feed(self, s: Settings):
+        self._video(s)
+
     def __del__(self) -> int:
         # TODO: Create deconstruct
         return 0

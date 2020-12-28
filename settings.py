@@ -13,6 +13,7 @@ class Settings:
     TCP_PORT: int
     use_test_image: bool
     test_image: str
+    autodetect: bool
 
     def __init__(self) -> None:
         try:
@@ -36,6 +37,7 @@ class Settings:
         self.TCP_PORT = self._json_obj['TCP_PORT']
         self.use_test_image = self._json_obj['use_test_image']
         self.test_image = self._json_obj['test_image']
+        self.autodetect = self._json_obj['autodetect']
 
     def __create_json(self) -> int:
         self._json_obj = {
@@ -51,7 +53,9 @@ class Settings:
             'TCP_IP': '127.0.0.1',
             'TCP_PORT': 5000,
             'use_test_image': False,
-            'test_image': "Test_Img.jpg"}
+            'test_image': "Test_Img.jpg",
+            'autodetect': False
+        }
 
         return self.update_json()
 
@@ -69,6 +73,7 @@ class Settings:
         self._json_obj['TCP_PORT'] = self.TCP_PORT
         self._json_obj['use_test_image'] = self.use_test_image
         self._json_obj['test_image'] = self.test_image
+        self._json_obj['autodetect'] = self.autodetect
 
         try:
             with open('./settings.json', 'w') as jsonFile:

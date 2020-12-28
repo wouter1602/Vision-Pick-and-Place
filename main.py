@@ -25,13 +25,19 @@ def main() -> None:
     cap = Video(s)
 
     while True:
-        cap.detect_objects(s)
-
+        # cap.detect_objects(s)
+        cap.update_live_feed(s)
         # cv.imshow("Contour", cap.video_lines)
 
         if s.display_output:
-            if win.update(s, cap) != 0:
+            status_code = win.update(s, cap)
+            if status_code == 2:
+                cap.detect_objects(s)
+            elif status_code != 0:
                 break
+            if win.update_detect:
+                cap.detect_objects(s)
+                win.update_detect = False
         # cv.waitKey(1)
     s.update_json()
     if s.display_output:
