@@ -1,16 +1,24 @@
 {
-    "display_output": true,
     "verbose": true,
     "capture_device": "/dev/video0",
-    "edge_detection_type": 2,
-    "canny_threshold_A": 87.0,
-    "canny_threshold_B": 168.0,
-    "contour_threshold_A": 90.0,
-    "contour_threshold_B": 255.0,
-    "contour_poly_threshold": 0.01,
-    "TCP_IP": "127.0.0.1",
-    "TCP_PORT": 5000,
+    "detection_settings": {
+        "edge_detection_type": 2,
+        "canny_threshold_A": 87.0,
+        "canny_threshold_B": 168.0,
+        "contour_threshold_A": 90.0,
+        "contour_threshold_B": 255.0,
+        "contour_poly_threshold": 0.01
+    },
+    "connection": {
+        "TCP_IP": "127.0.0.1",
+        "TCP_PORT": 5000
+    },
     "use_test_image": false,
     "test_image": "./Image/Test_Img_Resized.jpg",
-    "autodetect": true
+    "display_output": {
+        "enable": true,
+        "image_height": 360,
+        "image_width": 480,
+        "autodetect": false
+    }
 }
