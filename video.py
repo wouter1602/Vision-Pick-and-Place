@@ -55,22 +55,26 @@ class Video:
             x = approx.ravel()[0]
             y = approx.ravel()[1] - 5
             if len(approx) == 3:
-                cv.putText(self.video_output, "Triangle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
+                cv.putText(self.video_output, "Triangle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
+                if s.verbose:
+                    print("Found triangle at:", x, ", ", y)
             elif len(approx) == 4:
                 x, y, w, h = cv.boundingRect(approx)
                 aspect_ratio = float(w) / h
-                if s.verbose:
-                    print("Aspect ratio", aspect_ratio)
                 if 0.95 <= aspect_ratio < 1.05:
-                    cv.putText(self.video_output, "Square", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
+                    cv.putText(self.video_output, "Square", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
+                    if s.verbose:
+                        print("Found square at:", x, ", ", y)
                 else:
-                    cv.putText(self.video_output, "Rectangle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
-            elif len(approx) == 5:
-                cv.putText(self.video_output, "Pentagon", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
-            elif len(approx) == 10:
-                cv.putText(self.video_output, "Star", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
-            else:
-                cv.putText(self.video_output, "Circle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
+                    cv.putText(self.video_output, "Rectangle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
+                    if s.verbose:
+                        print("Found rectangle at:", x, ", ", y)
+            # elif len(approx) == 5:
+            #     cv.putText(self.video_output, "Pentagon", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
+            # elif len(approx) == 10:
+            #     cv.putText(self.video_output, "Star", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
+            # else:
+            #     cv.putText(self.video_output, "Circle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0))
 
     def _detect_lines(self, s: Settings):
         return cv.HoughLinesP(self.canny, 1, np.pi / 180, 60, np.array([]), 50, 5)
@@ -81,13 +85,25 @@ class Video:
             for x1, y1, x2, y2 in line:
                 cv.line(self.video_output, (x1, y1), (x2, y2), (255, 0, 0), 3)
 
+    def _dilate_edges(self, iterations=1):
+        kernel = np.ones((5, 5), np.uint8)
+        self.dilate = cv.dilate(self.canny, kernel, iterations=iterations)
+
+    def _erode_edges(self):
+        kernel = np.ones((5, 5), np.uint8)
+        self.erode = cv.erode(self.dilate, kernel)
+        self.morphologyEx = cv.morphologyEx(self.erode, cv.MORPH_GRADIENT, kernel)
+        self.erode = cv.erode(self.morphologyEx, kernel)
+
     def detect_objects(self, s: Settings):
         if s.edge_detection_type == 1:
             self._threshold(s)
             self._draw_contour(s, self._edge_contour(s, self.thrash))
         elif s.edge_detection_type == 2:
             self._edge_canny(s)
-            self._draw_contour(s, self._edge_contour(s, self.canny))
+            self._dilate_edges(1)
+            self._erode_edges()
+            self._draw_contour(s, self._edge_contour(s, self.erode))
         else:
             self._edge_canny(s)
             # self.draw_lines(s, self.detect_lines(s))

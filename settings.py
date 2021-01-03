@@ -1,4 +1,4 @@
-#Settigns Json
+# Settings Json
 import json
 import os
 

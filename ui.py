@@ -158,7 +158,7 @@ class Ui:
         if s.edge_detection_type == 1:
             view_3_view = cv.resize(v.thrash, (self.width, self.height))
         elif s.edge_detection_type == 2:
-            view_3_view = cv.resize(v.canny, (self.width, self.height))
+            view_3_view = cv.resize(v.erode, (self.width, self.height)) # Temp change
         else:
             view_3_view = cv.resize(v.canny, (self.width, self.height))
         normal_view = cv.resize(v.frame, (self.width, self.height))
