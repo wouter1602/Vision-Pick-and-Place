@@ -35,13 +35,6 @@ class Video:
             self._cap = cv.VideoCapture(s.capture_device)
             _, self.frame = self._cap.read()
 
-        # This defines some of the transformations that you can get of the images
-        # self.grayscale = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
-        # self.blur = cv.blur(self.frame, (1, 1))
-        # self.canny = cv.Canny(self.blur, s.canny_threshold_A, s.canny_threshold_B)
-        # self.lines = None
-        # self.thrash = None
-        # self.video_output = self.frame.copy()
         # This defines all the transformations that you can get of the images
         self.grayscale = self.frame.copy()
         self.blur = self.frame.copy()
@@ -82,6 +75,17 @@ class Video:
 
         self.canny = cv.Canny(self.grayscale, s.canny_threshold_A, s.canny_threshold_B)
 
+    def _edge_contour(self, frame: np.ndarray) -> List:
+        """
+        Detects contours found in the image
+        :param frame: current frame you want edge detection on
+        :type frame: np.ndarray
+        :return: List with all the found contours
+        """
+        # hierarchy is not used
+        contours, hierarchy = cv.findContours(frame, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+        return contours
+
     def _threshold(self, s: Settings) -> None:
         """
         Uses the "contour_threshold_A" and "contour_threshold_B" to create an threshold view of the objects.
@@ -96,17 +100,6 @@ class Video:
 
         ret, self.thrash = cv.threshold(self.grayscale, s.contour_threshold_A, s.contour_threshold_B,
                                         cv.CHAIN_APPROX_NONE)
-
-    def _edge_contour(self, frame: np.ndarray) -> List:
-        """
-        Detects contours found in the image
-        :param frame: current frame you want edge detection on
-        :type frame: np.ndarray
-        :return: List with all the found contours
-        """
-        # hierarchy is not used
-        contours, hierarchy = cv.findContours(frame, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
-        return contours
 
     def _draw_contour(self, s: Settings, contours: List) -> None:
         """
@@ -144,21 +137,18 @@ class Video:
                     if s.verbose:
                         print("Found rectangle at:", x, ", ", y)
 
-    def _detect_lines(self, s: Settings):
+    def _detect_lines(self) -> np.array:
         """
         Uses the HoughLineP function to detect lines.
-        :param s: Settings object used to store thresholds and camera used data
-        :type s: Settings
         :return:
         """
-        # TODO: place the variables in the Settings object so you can easily change them
-        # TODO: add type hinting to the return value
         return cv.HoughLinesP(self.canny, 1, np.pi / 180, 60, np.array([]), 50, 5)
 
-    def _draw_lines(self, lines) -> None:
+    def _draw_lines(self, lines: np.array) -> None:
         """
         Draws the lines found using the _detect_lines() function.
-        :param lines: List with lines found in the image TODO: update the type of list named here
+        :param lines: List with lines found in the image
+        :type lines: np.array
         :return: None
         """
         self.video_output = self.frame.copy()
@@ -166,7 +156,7 @@ class Video:
             for x1, y1, x2, y2 in line:
                 cv.line(self.video_output, (x1, y1), (x2, y2), (255, 0, 0), 3)
 
-    def _dilate_edges(self, iterations=1) -> None:
+    def _dilate_edges(self, iterations=1, frame=None) -> None:
         """
         Enlarges the edges found using the _edge_canny() function. This is done to remove as many double lines as
         possible
@@ -174,24 +164,21 @@ class Video:
         :type iterations: int
         :return: None
         """
-        # TODO: change this function to use a variable instead of hard coding canny image
-        # TODO: find parameters that can be added to the Settings object
         kernel = np.ones((5, 5), np.uint8)
-        self.dilate = cv.dilate(self.canny, kernel, iterations=iterations)
+        if frame is not None:  # if no input is given uses the canny data
+            self.dilate = cv.dilate(frame, kernel, iterations=iterations)
+        else:
+            self.dilate = cv.dilate(self.canny, kernel, iterations=iterations)
 
-    def _erode_edges(self) -> None:
+    def _erode_edges(self, iterations=1, frame=None) -> None:
         """
         Erodes the edges of the detected lines.
         This wil make the lines thinner and easier to detect using the detect lines functions.
         :return: None
         """
-        # TODO: change this function to use a variable instead of hard coding erode image
-        # TODO: add iterations
-        # TODO: find parameters that can be added to the Settings object
         kernel = np.ones((5, 5), np.uint8)
-        self.erode = cv.erode(self.dilate, kernel)
+        self.erode = cv.erode(self.dilate, kernel, iterations=iterations)
         self.morphologyEx = cv.morphologyEx(self.erode, cv.MORPH_GRADIENT, kernel)
-        self.erode = cv.erode(self.morphologyEx, kernel)
 
     def detect_objects(self, s: Settings) -> None:
         """
@@ -208,6 +195,11 @@ class Video:
             self._dilate_edges(1)
             self._erode_edges()
             self._draw_contour(s, self._edge_contour(self.erode))
+        elif s.edge_detection_type == 3:  # Blob + Canny filter method
+            # detect blob
+            # maybe dilate and erode necessary
+            # detect edges - canny
+            print("lmao")
         else:  # Simple Canny method
             self._edge_canny(s)
             # self.draw_lines(s, self.detect_lines(s))
