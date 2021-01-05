@@ -34,6 +34,8 @@ def main() -> None:
             status_code = win.update(s, cap)
             if status_code == 2:
                 cap.detect_objects(s)
+            elif status_code == 3:
+                win.del_extra_window()
             elif status_code != 0:
                 break
             if win.update_detect:

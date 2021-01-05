@@ -10,6 +10,8 @@ class Settings:
     edge_detection_type: int
     canny_threshold_A: int
     canny_threshold_B: int
+    blob_threshold_A: int
+    blob_threshold_B: int
     TCP_IP: str
     TCP_PORT: int
     use_test_image: bool
@@ -35,6 +37,8 @@ class Settings:
         self.canny_threshold_B = self._json_obj['detection_settings']['canny_threshold_B']
         self.contour_threshold_A = self._json_obj['detection_settings']['contour_threshold_A']
         self.contour_threshold_B = self._json_obj['detection_settings']['contour_threshold_B']
+        self.blob_threshold_A = self._json_obj['detection_settings']['blob_threshold_A']
+        self.blob_threshold_B = self._json_obj['detection_settings']['blob_threshold_B']
         self.contour_poly_threshold = self._json_obj['detection_settings']['contour_poly_threshold']
         self.TCP_IP = self._json_obj['connection']['TCP_IP']
         self.TCP_PORT = self._json_obj['connection']['TCP_PORT']
@@ -55,6 +59,8 @@ class Settings:
                 'canny_threshold_B': 100,
                 'contour_threshold_A': 100,
                 'contour_threshold_B': 255,
+                'blob_threshold_A': 255,
+                'blob_threshold_B': 255,
                 'contour_poly_threshold': 0.01
             },
             'connection': {
@@ -82,6 +88,8 @@ class Settings:
         self._json_obj['detection_settings']['contour_threshold_A'] = self.contour_threshold_A
         self._json_obj['detection_settings']['contour_threshold_B'] = self.contour_threshold_B
         self._json_obj['detection_settings']['contour_poly_threshold'] = self.contour_poly_threshold
+        self._json_obj['detection_settings']['blob_threshold_A'] = self.blob_threshold_A
+        self._json_obj['detection_settings']['blob_threshold_B'] = self.blob_threshold_B
         self._json_obj['connection']['TCP_IP'] = self.TCP_IP
         self._json_obj['connection']['TCP_PORT'] = self.TCP_PORT
         self._json_obj['use_test_image'] = self.use_test_image

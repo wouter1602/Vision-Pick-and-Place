@@ -2,11 +2,13 @@
     "verbose": true,
     "capture_device": "/dev/video0",
     "detection_settings": {
-        "edge_detection_type": 2,
-        "canny_threshold_A": 87.0,
-        "canny_threshold_B": 168.0,
-        "contour_threshold_A": 90.0,
+        "edge_detection_type": 1,
+        "canny_threshold_A": 90.0,
+        "canny_threshold_B": 162.0,
+        "contour_threshold_A": 176.0,
         "contour_threshold_B": 255.0,
+        "blob_threshold_A": 255,
+        "blob_threshold_B": 255,
         "contour_poly_threshold": 0.01
     },
     "connection": {
@@ -19,6 +21,6 @@
         "enable": true,
         "image_height": 360,
         "image_width": 480,
-        "autodetect": false
+        "autodetect": 1
     }
 }
