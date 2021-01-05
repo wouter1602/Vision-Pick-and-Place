@@ -33,6 +33,8 @@ def main() -> None:
         if s.display_output:
             status_code = win.update(s, cap)
             if status_code == 2:
+                if s.verbose:
+                    print("Started new detection")
                 cap.detect_objects(s)
             elif status_code == 3:
                 win.del_extra_window()
@@ -41,6 +43,8 @@ def main() -> None:
             if win.update_detect:
                 cap.detect_objects(s)
                 win.update_detect = False
+        else:
+            cap.detect_objects(s)
         # cv.waitKey(1)
     s.update_json()
     if s.display_output:

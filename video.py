@@ -62,7 +62,7 @@ class Video:
         """
         self.grayscale = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
 
-    def _edge_canny(self, s: Settings) -> None:
+    def _edge_canny(self, s: Settings, frame: np.ndarray) -> None:
         """
         Uses the "canny_threshold_A" and "canny_threshold_B" to create an Canny view of the objects.
         This function first grabs the most recent camera image an converts it to grayscale.
@@ -70,10 +70,8 @@ class Video:
         :type s: Settings
         :return: None
         """
-        self._get_video(s)
-        self._convert_to_grayscale()
 
-        self.canny = cv.Canny(self.grayscale, s.canny_threshold_A, s.canny_threshold_B)
+        self.canny = cv.Canny(frame, s.canny_threshold_A, s.canny_threshold_B)
 
     def _edge_contour(self, frame: np.ndarray) -> List:
         """
@@ -83,10 +81,15 @@ class Video:
         :return: List with all the found contours
         """
         # hierarchy is not used
-        contours, hierarchy = cv.findContours(frame, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+        contours, hierarchy = cv.findContours(frame, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
         return contours
 
-    def _threshold(self, s: Settings) -> None:
+    def _edge_blob(self, s: Settings, frame: np.ndarray) -> None:
+        detector = cv.SimpleBlobDetector()
+        keypoints = detector.detect(frame)
+        self.blob = keypoints
+
+    def _edge_threshold(self, s: Settings, frame = None) -> None:
         """
         Uses the "contour_threshold_A" and "contour_threshold_B" to create an threshold view of the objects.
         Turns part of the image white of black based on those thresholds.
@@ -95,11 +98,11 @@ class Video:
         :type s: Settings
         :return: None
         """
-        self._get_video(s)
-        self._convert_to_grayscale()
+        if frame is None:
+            frame = self.grayscale
 
-        ret, self.thrash = cv.threshold(self.grayscale, s.contour_threshold_A, s.contour_threshold_B,
-                                        cv.CHAIN_APPROX_NONE)
+        ret, self.thrash = cv.threshold(frame, s.contour_threshold_A, s.contour_threshold_B,
+                                        cv.THRESH_BINARY)
 
     def _draw_contour(self, s: Settings, contours: List) -> None:
         """
@@ -116,17 +119,19 @@ class Video:
             approx = cv.approxPolyDP(contour, s.contour_poly_threshold * cv.arcLength(contour, True), True)
             # contour_poly_threshold can be adjusted for recognition
             # approximates the contours found into shapes
-            cv.drawContours(self.video_output, [approx], 0, (0, 0, 0), 5)
+            # cv.drawContours(self.video_output, [approx], 0, (0, 255, 0), 2)
             x = approx.ravel()[0]
             y = approx.ravel()[1] - 5
             # if approx has 3 elements the object is a triangle
             if len(approx) == 3:
                 cv.putText(self.video_output, "Triangle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
+                cv.drawContours(self.video_output, [approx], 0, (0, 255, 255), 2)
                 if s.verbose:
                     print("Found triangle at:", x, ", ", y)
             # if approx has 4 element the object is a square or rectangle
             elif len(approx) == 4:
                 x, y, w, h = cv.boundingRect(approx)
+                cv.drawContours(self.video_output, [approx], 0, (0, 255, 255), 2)
                 aspect_ratio = float(w) / h
                 if 0.95 <= aspect_ratio < 1.05:
                     cv.putText(self.video_output, "Square", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
@@ -164,7 +169,7 @@ class Video:
         :type iterations: int
         :return: None
         """
-        kernel = np.ones((5, 5), np.uint8)
+        kernel = np.ones((3, 3), np.uint8)
         if frame is not None:  # if no input is given uses the canny data
             self.dilate = cv.dilate(frame, kernel, iterations=iterations)
         else:
@@ -176,9 +181,17 @@ class Video:
         This wil make the lines thinner and easier to detect using the detect lines functions.
         :return: None
         """
-        kernel = np.ones((5, 5), np.uint8)
+        kernel = np.ones((3, 3), np.uint8)
         self.erode = cv.erode(self.dilate, kernel, iterations=iterations)
-        self.morphologyEx = cv.morphologyEx(self.erode, cv.MORPH_GRADIENT, kernel)
+        # self.morphologyEx = cv.morphologyEx(self.erode, cv.MORPH_GRADIENT, kernel)
+
+    def _blur_edges(self, s: Settings, frame=None, ksize=None) -> None:
+        if ksize is None:
+            ksize = (int(s.blur_threshold_A), int(s.blur_threshold_B))
+        if frame is None:
+            frame = self.erode
+
+        self.blur = cv.blur(frame, ksize=ksize)
 
     def detect_objects(self, s: Settings) -> None:
         """
@@ -187,21 +200,29 @@ class Video:
         :type s: Settings
         :return: None
         """
+        self._get_video(s)
+        self._convert_to_grayscale()
         if s.edge_detection_type == 1:  # Threshold method
-            self._threshold(s)
+            self._edge_threshold(s)
             self._draw_contour(s, self._edge_contour(self.thrash))
         elif s.edge_detection_type == 2:  # Canny + filter method
-            self._edge_canny(s)
-            self._dilate_edges(1)
-            self._erode_edges()
-            self._draw_contour(s, self._edge_contour(self.erode))
+            gaussian_blur = cv.GaussianBlur(self.grayscale, (5, 5), sigmaX=0)
+            self._edge_threshold(s, gaussian_blur)
+            # self._blur_edges(s, , (1, 1))
+            self._edge_canny(s, self.thrash)
+            self._dilate_edges(s.dilate_iterations)
+            self._erode_edges(s.erode_iterations)
+            self._blur_edges(s)
+            # self._edge_canny(s, self.blur)
+            self._draw_contour(s, self._edge_contour(self.blur))
         elif s.edge_detection_type == 3:  # Blob + Canny filter method
+            self._edge_blob(s, self.grayscale)
+            self._edge_canny(s, self.blob)
             # detect blob
             # maybe dilate and erode necessary
             # detect edges - canny
-            print("lmao")
         else:  # Simple Canny method
-            self._edge_canny(s)
+            self._edge_canny(s, self.grayscale)
             # self.draw_lines(s, self.detect_lines(s))
 
     def update_live_feed(self, s: Settings) -> None:

@@ -9,6 +9,10 @@
         "contour_threshold_B": 255.0,
         "blob_threshold_A": 255,
         "blob_threshold_B": 255,
+        "blur_threshold_A": 10,
+        "blur_threshold_B": 10,
+        "dilate_iterations": 1,
+        "erode_iterations": 1,
         "contour_poly_threshold": 0.01
     },
     "connection": {

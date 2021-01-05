@@ -62,6 +62,10 @@ def detect_layout(s: Settings) -> List:
                    key='-SLIDER WINDOW 3 B-'),
          sg.Slider((0, 255), s.canny_threshold_B, 1, orientation='h', size=(40, 15), tooltip='Slider B',
                    key='-SLIDER WINDOW 4 B-')],
+        [sg.Radio('Erode view', 'view', default=True, visible=False, key='-RADIO ERODE-'),
+         sg.Radio('Dilate view', 'view', default=False, visible=False, key='-RADIO DILATE-'),
+         sg.Radio('Canny view', 'view 1', default=True, visible=False, key='-RADIO CANNY-'),
+         sg.Radio('Threshold view', 'view 1', default=False, visible=False, key='-RADIO THRESHOLD-')],
         [sg.Button('Exit', size=(10, 1)),
          sg.Button('Detect', size=(10, 1), disabled=s.autodetect, key='-DETECT BUTTON-')]
     ]
@@ -134,30 +138,15 @@ class Ui:
     def _update_layout(self, s) -> bool:
         if self._values['-DETECTION TYPE-'] == 'Threshold Detection' and s.edge_detection_type != 1:
             s.edge_detection_type = 1
-            # self._window['-VIEW 3 TEXT-'].update(value='Contour View')
-            # self._window['-VIEW 4 TEXT-'].update(value='Object View')
-            # self._window['-SLIDER A-'].update(range=(0, 255), value=s.contour_threshold_A)
-            # self._window['-SLIDER B-'].update(range=(0, 255), value=s.contour_threshold_B)
-            # self._window['-CANNY POLY SLIDER-'].update(visible=False)
             return True
         elif self._values['-DETECTION TYPE-'] == 'Canny + Threshold' and s.edge_detection_type != 2:
             s.edge_detection_type = 2
-            # self._window['-VIEW 3 TEXT-'].update(value='Canny View')
-            # self._window['-VIEW 4 TEXT-'].update(value='Object View')
-            # self._window['-SLIDER A-'].update(range=(0, 255), value=s.canny_threshold_A)
-            # self._window['-SLIDER B-'].update(range=(0, 255), value=s.canny_threshold_B)
-            # self._window['-CANNY POLY SLIDER-'].update(range=(0.001, 0.1), visible=True, value=s.contour_poly_threshold)
             return True
         elif self._values['-DETECTION TYPE-'] == 'Blob + Canny' and s.edge_detection_type != 3:
             s.edge_detection_type = 3
             return True
         elif self._values['-DETECTION TYPE-'] == 'Canny Detection' and s.edge_detection_type != 0:
             s.edge_detection_type = 0
-            # self._window['-VIEW 3 TEXT-'].update(value='Canny View')
-            # self._window['-VIEW 4 TEXT-'].update(value='Lines View')
-            # self._window['-SLIDER A-'].update(range=(0, 255), value=s.canny_threshold_A)
-            # self._window['-SLIDER B-'].update(range=(0, 255), value=s.canny_threshold_A)
-            # self._window['-CANNY POLY SLIDER-'].update(visible=False)
             return True
         else:
             return False
@@ -168,8 +157,14 @@ class Ui:
             s.contour_threshold_A = self._values_extra['-SLIDER WINDOW 2 A-']
             s.contour_threshold_B = self._values_extra['-SLIDER WINDOW 2 B-']
         elif s.edge_detection_type == 2:
+            s.contour_threshold_A = self._values_extra['-SLIDER WINDOW 1 A-']
+            s.contour_threshold_B = self._values_extra['-SLIDER WINDOW 1 B-']
             s.canny_threshold_A = self._values_extra['-SLIDER WINDOW 2 A-']
             s.canny_threshold_B = self._values_extra['-SLIDER WINDOW 2 B-']
+            s.dilate_iterations = int(self._values_extra['-SLIDER WINDOW 3 A-'])
+            s.erode_iterations = int(self._values_extra['-SLIDER WINDOW 3 B-'])
+            s.blur_threshold_A = int(self._values_extra['-SLIDER WINDOW 4 A-'])
+            s.blur_threshold_B = int(self._values_extra['-SLIDER WINDOW 4 B-'])
         elif s.edge_detection_type == 3:
             s.blob_threshold_A = self._values_extra['-SLIDER WINDOW 2 A-']
             s.blob_threshold_B = self._values_extra['-SLIDER WINDOW 2 B-']
@@ -203,6 +198,10 @@ class Ui:
             self._extra_window['-SLIDER WINDOW 3 B-'].update(visible=False)
             self._extra_window['-SLIDER WINDOW 4 A-'].update(visible=False)
             self._extra_window['-SLIDER WINDOW 4 B-'].update(visible=False)
+            self._extra_window['-RADIO ERODE-'].update(visible=False)
+            self._extra_window['-RADIO DILATE-'].update(visible=False)
+            self._extra_window['-RADIO CANNY-'].update(visible=False)
+            self._extra_window['-RADIO THRESHOLD-'].update(visible=False)
             return True
         elif self._values['-DETECTION TYPE-'] == 'Canny + Threshold' and s.edge_detection_type != 2:
             s.edge_detection_type = 2
@@ -210,21 +209,31 @@ class Ui:
             self._extra_window['-WINDOW 1 TEXT-'].update(value='Grayscale View', visible=True)
             self._extra_window['-WINDOW 2 TEXT-'].update(value='Canny View', visible=True)
             self._extra_window['-WINDOW 3 TEXT-'].update(value='Erode View', visible=True)
-            self._extra_window['-WINDOW 4 TEXT-'].update(visible=False)
+            self._extra_window['-WINDOW 4 TEXT-'].update(value='Blur View', visible=True)
             self._extra_window['-WINDOW 1-'].update(visible=True)
             self._extra_window['-WINDOW 2-'].update(visible=True)
             self._extra_window['-WINDOW 3-'].update(visible=True)
-            self._extra_window['-WINDOW 4-'].update(visible=False)
-            self._extra_window['-SLIDER WINDOW 1 A-'].update(visible=False)
-            self._extra_window['-SLIDER WINDOW 1 B-'].update(visible=False)
+            self._extra_window['-WINDOW 4-'].update(visible=True)
+            self._extra_window['-SLIDER WINDOW 1 A-'].update(range=(0, 255), value=s.contour_threshold_A,
+                                                             visible=True)
+            self._extra_window['-SLIDER WINDOW 1 B-'].update(range=(0, 255), value=s.contour_threshold_B,
+                                                             visible=True)
             self._extra_window['-SLIDER WINDOW 2 A-'].update(range=(0, 255), value=s.canny_threshold_A,
                                                              visible=True)
             self._extra_window['-SLIDER WINDOW 2 B-'].update(range=(0, 255), value=s.canny_threshold_B,
                                                              visible=True)
-            self._extra_window['-SLIDER WINDOW 3 A-'].update(visible=False)
-            self._extra_window['-SLIDER WINDOW 3 B-'].update(visible=False)
-            self._extra_window['-SLIDER WINDOW 4 A-'].update(visible=False)
-            self._extra_window['-SLIDER WINDOW 4 B-'].update(visible=False)
+            self._extra_window['-SLIDER WINDOW 3 A-'].update(range=(1, 10), value=s.dilate_iterations,
+                                                             visible=True)
+            self._extra_window['-SLIDER WINDOW 3 B-'].update(range=(1, 10), value=s.erode_iterations,
+                                                             visible=True)
+            self._extra_window['-SLIDER WINDOW 4 A-'].update(range=(1, 50), value=s.blur_threshold_A,
+                                                             visible=True)
+            self._extra_window['-SLIDER WINDOW 4 B-'].update(range=(1, 50), value=s.blur_threshold_B,
+                                                             visible=True)
+            self._extra_window['-RADIO ERODE-'].update(visible=True)
+            self._extra_window['-RADIO DILATE-'].update(visible=True)
+            self._extra_window['-RADIO CANNY-'].update(visible=True)
+            self._extra_window['-RADIO THRESHOLD-'].update(visible=True)
             return True
         elif self._values['-DETECTION TYPE-'] == 'Blob + Canny' and s.edge_detection_type != 3:
             s.edge_detection_type = 3
@@ -253,6 +262,10 @@ class Ui:
             self._extra_window['-SLIDER WINDOW 4 B-'].update(range=(0, 255), value=s.canny_threshold_B,
                                                              # TODO: Update slider
                                                              visible=True)
+            self._extra_window['-RADIO ERODE-'].update(visible=False)
+            self._extra_window['-RADIO DILATE-'].update(visible=False)
+            self._extra_window['-RADIO CANNY-'].update(visible=False)
+            self._extra_window['-RADIO THRESHOLD-'].update(visible=False)
             return True
         elif self._values['-DETECTION TYPE-'] == 'Canny Detection' and s.edge_detection_type != 0:
             s.edge_detection_type = 0
@@ -275,6 +288,10 @@ class Ui:
             self._extra_window['-SLIDER WINDOW 3 B-'].update(visible=False)
             self._extra_window['-SLIDER WINDOW 4 A-'].update(visible=False)
             self._extra_window['-SLIDER WINDOW 4 B-'].update(visible=False)
+            self._extra_window['-RADIO ERODE-'].update(visible=False)
+            self._extra_window['-RADIO DILATE-'].update(visible=False)
+            self._extra_window['-RADIO CANNY-'].update(visible=False)
+            self._extra_window['-RADIO THRESHOLD-'].update(visible=False)
             return True
         else:
             return False
@@ -291,8 +308,20 @@ class Ui:
         if s.edge_detection_type == 1:
             window2_view = cv.resize(v.thrash, (s.image_width, s.image_height))
         elif s.edge_detection_type == 2:
-            window2_view = cv.resize(v.canny, (s.image_width, s.image_height))
-            window3_view = cv.resize(v.erode, (s.image_width, s.image_height))
+            if self._values_extra['-RADIO CANNY-']:
+                window2_view = cv.resize(v.canny, (s.image_width, s.image_height))
+                self._extra_window['-WINDOW 2 TEXT-'].update(value='Canny view')
+            else:
+                window2_view = cv.resize(v.thrash, (s.image_width, s.image_height))
+                self._extra_window['-WINDOW 2 TEXT-'].update(value='Threshold view')
+            if self._values_extra['-RADIO ERODE-']:
+                window3_view = cv.resize(v.erode, (s.image_width, s.image_height))
+                self._extra_window['-WINDOW 3 TEXT-'].update(value='Erode view')
+            else:
+                window3_view = cv.resize(v.dilate, (s.image_width, s.image_height))
+                self._extra_window['-WINDOW 3 TEXT-'].update(value='Dilate view')
+
+            window4_view = cv.resize(v.blur, (s.image_width, s.image_height))
         elif s.edge_detection_type == 3:
             window2_view = cv.resize(v.blob, (s.image_width, s.image_height))
             window3_view = cv.resize(v.canny, (s.image_width, s.image_height))
@@ -311,11 +340,8 @@ class Ui:
         if s.edge_detection_type > 1:
             imgbytes_window3 = cv.imencode('.png', window3_view)[1].tobytes()
             self._extra_window['-WINDOW 3-'].update(data=imgbytes_window3, size=(s.image_width, s.image_height))
-        if s.edge_detection_type == 3:
             imgbytes_window4 = cv.imencode('.png', window4_view)[1].tobytes()
             self._extra_window['-WINDOW 4-'].update(data=imgbytes_window4, size=(s.image_width, s.image_height))
-
-
 
     def del_extra_window(self):
         self._extra_window.close()
