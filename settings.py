@@ -7,6 +7,8 @@ class Settings:
     display_output: bool
     verbose: bool
     capture_device: str
+    frame_width: int
+    frame_height: int
     edge_detection_type: int
     canny_threshold_A: int
     canny_threshold_B: int
@@ -36,6 +38,8 @@ class Settings:
 
         self.verbose = self._json_obj['verbose']
         self.capture_device = self._json_obj['capture_device']
+        self.frame_width = self._json_obj['webcam_settings']['frame_width']
+        self.frame_height = self._json_obj['webcam_settings']['frame_height']
         self.edge_detection_type = self._json_obj['detection_settings']['edge_detection_type']
         self.canny_threshold_A = self._json_obj['detection_settings']['canny_threshold_A']
         self.canny_threshold_B = self._json_obj['detection_settings']['canny_threshold_B']
@@ -61,6 +65,10 @@ class Settings:
         self._json_obj = {
             'verbose': False,
             'capture_device': "/dev/video0",
+            'webcam_settings': {
+                'frame_width': 2000,
+                'frame_height': 2000
+            },
             'detection_settings': {
                 'edge_detection_type': 0,
                 'canny_threshold_A': 100,
@@ -92,6 +100,8 @@ class Settings:
     def update_json(self) -> int:
         self._json_obj['verbose'] = self.verbose
         self._json_obj['capture_device'] = self.capture_device
+        self._json_obj['webcam_settings']['frame_width'] = self.frame_width
+        self._json_obj['webcam_settings']['frame_height'] = self.frame_height
         self._json_obj['detection_settings']['edge_detection_type'] = self.edge_detection_type
         self._json_obj['detection_settings']['canny_threshold_A'] = self.canny_threshold_A
         self._json_obj['detection_settings']['canny_threshold_B'] = self.canny_threshold_B
