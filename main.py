@@ -30,6 +30,10 @@ def main() -> None:
         if s.autodetect:
             cap.detect_objects(s)
 
+        # cv.imwrite('./frame.bmp', cap.frame)
+        cv.imwrite('./blank.bmp', cap.blank)
+        # cv.waitKey(1)
+
         if s.display_output:
             status_code = win.update(s, cap)
             if status_code == 2:
@@ -45,7 +49,7 @@ def main() -> None:
                 win.update_detect = False
         else:
             cap.detect_objects(s)
-        # cv.waitKey(1)
+
     s.update_json()
     if s.display_output:
         del win

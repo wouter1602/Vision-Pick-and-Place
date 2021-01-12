@@ -2,17 +2,17 @@
     "verbose": true,
     "capture_device": "/dev/video0",
     "detection_settings": {
-        "edge_detection_type": 1,
-        "canny_threshold_A": 90.0,
-        "canny_threshold_B": 162.0,
-        "contour_threshold_A": 176.0,
+        "edge_detection_type": 2,
+        "canny_threshold_A": 22.0,
+        "canny_threshold_B": 250.0,
+        "contour_threshold_A": 171.0,
         "contour_threshold_B": 255.0,
         "blob_threshold_A": 255,
         "blob_threshold_B": 255,
-        "blur_threshold_A": 10,
-        "blur_threshold_B": 10,
-        "dilate_iterations": 1,
-        "erode_iterations": 1,
+        "blur_threshold_A": 3,
+        "blur_threshold_B": 3,
+        "dilate_iterations": 4,
+        "erode_iterations": 4,
         "contour_poly_threshold": 0.01
     },
     "connection": {
@@ -23,8 +23,8 @@
     "test_image": "./Image/Test_Img_Resized.jpg",
     "display_output": {
         "enable": true,
-        "image_height": 360,
-        "image_width": 480,
-        "autodetect": 1
+        "image_height": 480,
+        "image_width": 720,
+        "autodetect": 0
     }
 }

@@ -2,7 +2,7 @@
 
 from settings import Settings
 
-from typing import List
+from typing import List, Union
 import cv2 as cv
 import numpy as np
 
@@ -44,6 +44,7 @@ class Video:
         self.dilate = self.frame.copy()
         self.erode = self.frame.copy()
         self.morphologyEx = self.frame.copy()
+        self.blank = self.frame.copy()
 
     def _get_video(self, s: Settings) -> None:
         """
@@ -73,7 +74,8 @@ class Video:
 
         self.canny = cv.Canny(frame, s.canny_threshold_A, s.canny_threshold_B)
 
-    def _edge_contour(self, frame: np.ndarray) -> List:
+    @staticmethod
+    def _edge_contour(frame: np.ndarray) -> List:
         """
         Detects contours found in the image
         :param frame: current frame you want edge detection on
@@ -89,7 +91,16 @@ class Video:
         keypoints = detector.detect(frame)
         self.blob = keypoints
 
-    def _edge_threshold(self, s: Settings, frame = None) -> None:
+    @staticmethod
+    def _draw_every_contour(s: Settings, contours: Union[np.ndarray, List], width, height) -> np.ndarray:
+        frame = np.zeros(shape=(width, height), dtype=np.uint8)
+        for contour in contours:
+            approx = cv.approxPolyDP(contour, s.contour_poly_threshold * cv.arcLength(contour, True), True)
+            cv.drawContours(frame, [approx], 0, (255, 255, 255), 1)
+        return frame
+
+
+    def _edge_threshold(self, s: Settings, frame=None) -> None:
         """
         Uses the "contour_threshold_A" and "contour_threshold_B" to create an threshold view of the objects.
         Turns part of the image white of black based on those thresholds.
@@ -125,13 +136,13 @@ class Video:
             # if approx has 3 elements the object is a triangle
             if len(approx) == 3:
                 cv.putText(self.video_output, "Triangle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
-                cv.drawContours(self.video_output, [approx], 0, (0, 255, 255), 2)
+                cv.drawContours(self.video_output, [approx], 0, (0, 0, 255), 2)
                 if s.verbose:
                     print("Found triangle at:", x, ", ", y)
             # if approx has 4 element the object is a square or rectangle
             elif len(approx) == 4:
                 x, y, w, h = cv.boundingRect(approx)
-                cv.drawContours(self.video_output, [approx], 0, (0, 255, 255), 2)
+                cv.drawContours(self.video_output, [approx], 0, (0, 0, 255), 2)
                 aspect_ratio = float(w) / h
                 if 0.95 <= aspect_ratio < 1.05:
                     cv.putText(self.video_output, "Square", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
@@ -141,13 +152,31 @@ class Video:
                     cv.putText(self.video_output, "Rectangle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
                     if s.verbose:
                         print("Found rectangle at:", x, ", ", y)
+            else:
+                str = "No idea it has {} lines".format(len(approx))
+                cv.putText(self.video_output, str, (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
+                cv.drawContours(self.video_output, [approx], 0, (0, 255, 255), 2)
 
-    def _detect_lines(self) -> np.array:
+    def _draw_lines_exp(self, s: Settings, contours: List):
+        size = self.grayscale.shape
+        blank = self.grayscale.copy()
+        blank.fill(0)
+        # blank = np.ndarray(shape=size, dtype=np.uint8, order='F')
+        for contour in contours:
+            approx = cv.approxPolyDP(contour, s.contour_poly_threshold * cv.arcLength(contour, True), True)
+            cv.drawContours(blank, [approx], 0, (255, 255, 255), 2)
+        return blank
+
+    def _detect_lines(self, frame=None) -> np.array:
         """
         Uses the HoughLineP function to detect lines.
         :return:
         """
-        return cv.HoughLinesP(self.canny, 1, np.pi / 180, 60, np.array([]), 50, 5)
+        if frame is None:
+            frame = self.canny
+
+        return cv.HoughLinesP(image=frame, rho=1, theta=np.pi / 180, threshold=50, lines=np.array([]), minLineLength=10,
+                              maxLineGap=5)
 
     def _draw_lines(self, lines: np.array) -> None:
         """
@@ -156,10 +185,10 @@ class Video:
         :type lines: np.array
         :return: None
         """
-        self.video_output = self.frame.copy()
-        for line in lines:
-            for x1, y1, x2, y2 in line:
-                cv.line(self.video_output, (x1, y1), (x2, y2), (255, 0, 0), 3)
+        self.video_output = self.grayscale.copy()
+        self.video_output.fill(0)
+        for x1, y1, x2, y2 in lines:
+            cv.line(self.video_output, (x1, y1), (x2, y2), (255, 0, 0), 1)
 
     def _dilate_edges(self, iterations=1, frame=None) -> None:
         """
@@ -202,19 +231,39 @@ class Video:
         """
         self._get_video(s)
         self._convert_to_grayscale()
+        width, height = self.frame.shape[:, 2]
         if s.edge_detection_type == 1:  # Threshold method
             self._edge_threshold(s)
             self._draw_contour(s, self._edge_contour(self.thrash))
         elif s.edge_detection_type == 2:  # Canny + filter method
-            gaussian_blur = cv.GaussianBlur(self.grayscale, (5, 5), sigmaX=0)
-            self._edge_threshold(s, gaussian_blur)
-            # self._blur_edges(s, , (1, 1))
+            # gaussian_blur = cv.GaussianBlur(self.grayscale, (5, 5), sigmaX=0)
+            # self._edge_threshold(s, gaussian_blur)
+            # # self._blur_edges(s, , (1, 1))
+            # self._edge_canny(s, self.thrash)
+            # self._dilate_edges(s.dilate_iterations)
+            # self._erode_edges(s.erode_iterations)
+            # self._blur_edges(s)
+            # # self._edge_canny(s, self.blur)
+            # self.blank = self._draw_lines_exp(s, self._edge_contour(self.blur))
+            # self._draw_contour(s, self._edge_contour(self.blank))
+
+            gausian_blur = cv.GaussianBlur(self.grayscale, (5, 5), sigmaX=0)
+            self._edge_threshold(s, gausian_blur)
             self._edge_canny(s, self.thrash)
-            self._dilate_edges(s.dilate_iterations)
-            self._erode_edges(s.erode_iterations)
-            self._blur_edges(s)
-            # self._edge_canny(s, self.blur)
-            self._draw_contour(s, self._edge_contour(self.blur))
+            contours1 = self._edge_contour(self.canny)
+            line_frame = self._draw_every_contour(s, contours1, width, height)
+            
+            self._dilate_edges(s.dilate_iterations, self.canny)
+            self._erode_edges(s.erode_iterations, self.dilate)
+            self._blur_edges(s, frame=self.erode)
+            contours = self._edge_contour(self.canny)
+            self._draw_contour(s, contours)
+            # lines_array = self._detect_lines(frame=self.blur)
+
+            # lines_array = lines_array[:, 0, :] # Filters
+            # self._draw_lines(lines_array)
+            # if s.verbose:
+            #     print(lines_array)
         elif s.edge_detection_type == 3:  # Blob + Canny filter method
             self._edge_blob(s, self.grayscale)
             self._edge_canny(s, self.blob)
