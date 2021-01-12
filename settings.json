@@ -1,11 +1,15 @@
 {
     "verbose": true,
     "capture_device": "/dev/video0",
+    "webcam_settings": {
+        "frame_width": 2000,
+        "frame_height": 2000
+    },
     "detection_settings": {
         "edge_detection_type": 2,
         "canny_threshold_A": 22.0,
         "canny_threshold_B": 250.0,
-        "contour_threshold_A": 171.0,
+        "contour_threshold_A": 165.0,
         "contour_threshold_B": 255.0,
         "blob_threshold_A": 255,
         "blob_threshold_B": 255,
@@ -25,6 +29,6 @@
         "enable": true,
         "image_height": 480,
         "image_width": 720,
-        "autodetect": 0
+        "autodetect": 1
     }
 }

@@ -34,6 +34,8 @@ class Video:
             self.frame = cv.imread(s.test_image)
         else:
             self._cap = cv.VideoCapture(s.capture_device)
+            self._cap.set(cv.CAP_PROP_FRAME_WIDTH, s.frame_width)
+            self._cap.set(cv.CAP_PROP_FRAME_HEIGHT, s.frame_height)
             _, self.frame = self._cap.read()
 
         # This defines all the transformations that you can get of the images
