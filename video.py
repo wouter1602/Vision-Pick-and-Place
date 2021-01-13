@@ -120,7 +120,7 @@ class Video:
         return keypoints
 
     @staticmethod
-    def _edge_threshold(s: Settings, frame: np.ndarray) -> np.ndarray:
+    def _edge_threshold(s: Settings, frame: np.ndarray, threshold_A = None, threshold_B = None) -> np.ndarray:
         """
         Uses the "contour_threshold_A" and "contour_threshold_B" to create an threshold view of the objects.
         Turns part of the image white of black based on those thresholds.
@@ -129,11 +129,19 @@ class Video:
         :type s: Settings
         :param frame: grayscale image for threshold detection
         :type frame: np.ndarray
+        :param threshold_A:
+        :type threshold_A: Union[int, None]
+        :param threshold_B:
+        :type threshold_B: Union[int, None]
         :return: threshold image
         :rtype: np.ndarray
         """
+        if threshold_A is None:
+            threshold_A = s.contour_threshold_A
+        if threshold_B is None:
+            threshold_B = s.contour_threshold_B
 
-        ret, thresh = cv.threshold(frame, s.contour_threshold_A, s.contour_threshold_B, cv.THRESH_BINARY)
+        ret, thresh = cv.threshold(frame, threshold_A, threshold_B, cv.THRESH_BINARY)
         return thresh
 
     @staticmethod
@@ -307,13 +315,23 @@ class Video:
             self.video_output = self._draw_contour(s, self.frame, self._edge_contour(self.thrash))
         elif s.edge_detection_type == 2:  # Threshold + Canny shape detection
             gausian_blur = cv.GaussianBlur(self.grayscale, (5, 5), sigmaX=0)
-            self.thrash = self._edge_threshold(s, gausian_blur)
+            B_channel = self._edge_threshold(s, self.frame[:, :, 0], 100, 255)
+            G_channel = self._edge_threshold(s, self.frame[:, :, 1], 100, 255)
+            R_channel = self._edge_threshold(s, self.frame[:, :, 2], 100, 255)
+            mask = B_channel+G_channel+R_channel
+            mask = mask > 1
+            mask = mask.astype(int)
+            background_filter = gausian_blur * mask
+            background_filter = background_filter.astype(np.uint8)
+            cv.imwrite('./background_filter.bmp', background_filter)
+            self.thrash = self._edge_threshold(s, background_filter)
             self.canny = self._edge_canny(s, self.thrash)
             self.dilate = self._dilate_edges(self.canny, iterations=s.dilate_iterations)
             self.erode = self._erode_edges(self.dilate, iterations=s.erode_iterations)
             self.blur = self._blur_edges(s, self.erode)
             contours = self._edge_contour(self.blur)
             self.video_output = self._draw_contour(s, self.frame, contours)
+            cv.imwrite('./output.bmp', self.video_output)
         elif s.edge_detection_type == 3:  # Blob + Canny shape detection
             self.blob = self._edge_blob(self.grayscale)
             self.canny = self._edge_canny(s, self.blob)
