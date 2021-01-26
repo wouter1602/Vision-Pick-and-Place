@@ -31,7 +31,8 @@ def main() -> None:
             cap.detect_objects(s)
 
         # cv.imwrite('./frame.bmp', cap.frame)
-        cv.imwrite('./blank.bmp', cap.blank)
+        # cv.imwrite('./blank.bmp', cap.blank)
+        cv.imwrite('./frame.bmp', cap.frame)
         # cv.waitKey(1)
 
         if s.display_output:

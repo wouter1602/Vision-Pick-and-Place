@@ -120,7 +120,7 @@ class Video:
         return keypoints
 
     @staticmethod
-    def _edge_threshold(s: Settings, frame: np.ndarray, threshold_A = None, threshold_B = None) -> np.ndarray:
+    def _edge_threshold(s: Settings, frame: np.ndarray, threshold_A=None, threshold_B=None) -> np.ndarray:
         """
         Uses the "contour_threshold_A" and "contour_threshold_B" to create an threshold view of the objects.
         Turns part of the image white of black based on those thresholds.
@@ -188,6 +188,16 @@ class Video:
             x = approx.ravel()[0]
             y = approx.ravel()[1] - 5
             # if approx has 3 elements the object is a triangle
+            # TODO: get centre of a poligon
+            x_low = np.amin(approx[:, 0, 0])
+            x_high = np.amax(approx[:, 0, 0])
+            y_low = np.amin(approx[:, 0, 1])
+            y_high = np.amax(approx[:, 0, 1])
+
+            x_center = x_high - x_low
+            y_center = y_high - y_low
+            if Video._check_pixel(video_output, s.triangle_1, x_center, y_center, 5):
+                print("Good")
             if len(approx) == 3:
                 cv.putText(video_output, "Triangle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
                 cv.drawContours(video_output, [approx], 0, (0, 0, 255), 2)
@@ -211,6 +221,18 @@ class Video:
                 cv.putText(video_output, str, (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
                 cv.drawContours(video_output, [approx], 0, (0, 255, 255), 2)
         return video_output
+
+    @staticmethod
+    def _check_pixel(frame: np.ndarray, colour: int, x: int, y: int, sigma: Union[float, int]) -> bool:
+        R = (colour >> 0) & 0xFF
+        G = (colour >> 8) & 0xFF
+        B = (colour >> 16) & 0xFF
+
+        if (B - sigma) < frame[x, y, 0] < (B + sigma) and (G - sigma) < frame[x, y, 1] < (G + sigma) and (R - sigma) < \
+                frame[x, y, 2] < (R + sigma):
+            return True
+        else:
+            return False
 
     @staticmethod
     def _detect_lines(frame: np.ndarray) -> np.array:
@@ -315,16 +337,7 @@ class Video:
             self.video_output = self._draw_contour(s, self.frame, self._edge_contour(self.thrash))
         elif s.edge_detection_type == 2:  # Threshold + Canny shape detection
             gausian_blur = cv.GaussianBlur(self.grayscale, (5, 5), sigmaX=0)
-            B_channel = self._edge_threshold(s, self.frame[:, :, 0], 100, 255)
-            G_channel = self._edge_threshold(s, self.frame[:, :, 1], 100, 255)
-            R_channel = self._edge_threshold(s, self.frame[:, :, 2], 100, 255)
-            mask = B_channel+G_channel+R_channel
-            mask = mask > 1
-            mask = mask.astype(int)
-            background_filter = gausian_blur * mask
-            background_filter = background_filter.astype(np.uint8)
-            cv.imwrite('./background_filter.bmp', background_filter)
-            self.thrash = self._edge_threshold(s, background_filter)
+            self.thrash = self._edge_threshold(s, gausian_blur)
             self.canny = self._edge_canny(s, self.thrash)
             self.dilate = self._dilate_edges(self.canny, iterations=s.dilate_iterations)
             self.erode = self._erode_edges(self.dilate, iterations=s.erode_iterations)

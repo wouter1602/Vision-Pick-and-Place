@@ -79,7 +79,7 @@ class Ui:
         self.layout = main_layout(s)
         self.extra_layout = detect_layout(s)
         self.update_detect = False
-        self._window = sg.Window('OpenCV TestWindow', self.layout, location=(800, 400), icon='./Image/Eye.png')
+        self._window = sg.Window('Vision A3 detection debugger', self.layout, location=(800, 400), icon='./Image/Eye.png')
         self._extra_window = None
         self._event = None
         self._values = None

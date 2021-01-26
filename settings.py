@@ -18,6 +18,13 @@ class Settings:
     blur_threshold_B: int
     dilate_iterations: int
     erode_iterations: int
+    triangle_1: int
+    triangle_2: int
+    triangle_3: int
+    triangle_4: int
+    triangle_5: int
+    square: int
+    parallelogram: int
     TCP_IP: str
     TCP_PORT: int
     use_test_image: bool
@@ -51,6 +58,13 @@ class Settings:
         self.blur_threshold_B = self._json_obj['detection_settings']['blur_threshold_B']
         self.dilate_iterations = self._json_obj['detection_settings']['dilate_iterations']
         self.erode_iterations = self._json_obj['detection_settings']['erode_iterations']
+        self.triangle_1 = self._json_obj['block_colours']['triangle_1']
+        self.triangle_2 = self._json_obj['block_colours']['triangle_2']
+        self.triangle_3 = self._json_obj['block_colours']['triangle_3']
+        self.triangle_4 = self._json_obj['block_colours']['triangle_4']
+        self.triangle_5 = self._json_obj['block_colours']['triangle_5']
+        self.square = self._json_obj['block_colours']['square']
+        self.parallelogram = self._json_obj['block_colours']['parallelogram']
         self.contour_poly_threshold = self._json_obj['detection_settings']['contour_poly_threshold']
         self.TCP_IP = self._json_obj['connection']['TCP_IP']
         self.TCP_PORT = self._json_obj['connection']['TCP_PORT']
@@ -81,6 +95,15 @@ class Settings:
                 'blur_threshold_B': 10,
                 'contour_poly_threshold': 0.01
             },
+            'block_colours': {
+                'triangle_1': 0xFFFFFF,
+                'triangle_2': 0xFFFFFF,
+                'triangle_3': 0xFFFFFF,
+                'triangle_4': 0xFFFFFF,
+                'triangle_5': 0xFFFFFF,
+                'square': 0xFFFFFF,
+                'parallelogram': 0xFFFFFF
+            },
             'connection': {
                 'TCP_IP': '127.0.0.1',
                 'TCP_PORT': 5000,
@@ -102,6 +125,7 @@ class Settings:
         self._json_obj['capture_device'] = self.capture_device
         self._json_obj['webcam_settings']['frame_width'] = self.frame_width
         self._json_obj['webcam_settings']['frame_height'] = self.frame_height
+
         self._json_obj['detection_settings']['edge_detection_type'] = self.edge_detection_type
         self._json_obj['detection_settings']['canny_threshold_A'] = self.canny_threshold_A
         self._json_obj['detection_settings']['canny_threshold_B'] = self.canny_threshold_B
@@ -114,10 +138,21 @@ class Settings:
         self._json_obj['detection_settings']['blur_threshold_B'] = self.blur_threshold_B
         self._json_obj['detection_settings']['dilate_iterations'] = self.dilate_iterations
         self._json_obj['detection_settings']['erode_iterations'] = self.erode_iterations
+
+        self._json_obj['block_colours']['triangle_1'] = self.triangle_1
+        self._json_obj['block_colours']['triangle_2'] = self.triangle_2
+        self._json_obj['block_colours']['triangle_3'] = self.triangle_3
+        self._json_obj['block_colours']['triangle_4'] = self.triangle_4
+        self._json_obj['block_colours']['triangle_5'] = self.triangle_5
+        self._json_obj['block_colours']['square'] = self.square
+        self._json_obj['block_colours']['parallelogram'] = self.parallelogram
+
         self._json_obj['connection']['TCP_IP'] = self.TCP_IP
         self._json_obj['connection']['TCP_PORT'] = self.TCP_PORT
+
         self._json_obj['use_test_image'] = self.use_test_image
         self._json_obj['test_image'] = self.test_image
+
         self._json_obj['display_output']['enable'] = self.display_output
         self._json_obj['display_output']['image_height'] = self.image_height
         self._json_obj['display_output']['image_width'] = self.image_width

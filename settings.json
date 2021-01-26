@@ -7,9 +7,9 @@
     },
     "detection_settings": {
         "edge_detection_type": 2,
-        "canny_threshold_A": 22.0,
-        "canny_threshold_B": 250.0,
-        "contour_threshold_A": 165.0,
+        "canny_threshold_A": 73.0,
+        "canny_threshold_B": 255.0,
+        "contour_threshold_A": 136.0,
         "contour_threshold_B": 255.0,
         "blob_threshold_A": 255,
         "blob_threshold_B": 255,
@@ -19,16 +19,25 @@
         "erode_iterations": 4,
         "contour_poly_threshold": 0.01
     },
+    "block_colours": {
+        "triangle_1": 16751733,
+        "triangle_2": 7077525,
+        "triangle_3": 16765604,
+        "triangle_4": 16777215,
+        "triangle_5": 1692394,
+        "square": 16777144,
+        "parallelogram": 14659839
+    },
     "connection": {
         "TCP_IP": "127.0.0.1",
         "TCP_PORT": 5000
     },
-    "use_test_image": false,
-    "test_image": "./Image/Test_Img_Resized.jpg",
+    "use_test_image": true,
+    "test_image": "./Image/Test_frame_1.bmp",
     "display_output": {
         "enable": true,
-        "image_height": 480,
-        "image_width": 720,
+        "image_height": 360,
+        "image_width": 480,
         "autodetect": 1
     }
 }
