@@ -8,6 +8,12 @@ from video import Video
 
 
 def main_layout(s: Settings) -> List:
+    """
+    Creates an list with the layout of the main window, costum to the edge detection type
+    :param s: settings object used for edge_detection_type
+    :return: List with the layout
+    :rtype: List
+    """
     if s.edge_detection_type == 1:
         standard_type = 'Threshold Detection'
     elif s.edge_detection_type == 2:
@@ -36,6 +42,12 @@ def main_layout(s: Settings) -> List:
 
 
 def detect_layout(s: Settings) -> List:
+    """
+    Creates an list with the layout of the dection window, costum to the edge detection type
+    :param s: settings object used for edge_detection_type
+    :return: List with the layout
+    :rtype: List
+    """
     layout = [
         [sg.Text('Detection type', size=(60, 1), justification='center', key='-DETECTION TYPE TEXT-')],
         [sg.Text('Window 1', size=(60, 1), justification='left', key='-WINDOW 1 TEXT-'),
@@ -74,12 +86,17 @@ def detect_layout(s: Settings) -> List:
 
 class Ui:
     def __init__(self, s: Settings):
+        """
+        Creates the main window
+        :param s: Settings object used for edge detection type
+        """
         sg.theme('Topanga')
 
         self.layout = main_layout(s)
         self.extra_layout = detect_layout(s)
         self.update_detect = False
-        self._window = sg.Window('Vision A3 detection debugger', self.layout, location=(800, 400), icon='./Image/Eye.png')
+        self._window = sg.Window('Vision A3 detection debugger', self.layout, location=(800, 400),
+                                 icon='./Image/Eye.png')
         self._extra_window = None
         self._event = None
         self._values = None
@@ -88,6 +105,18 @@ class Ui:
         self._extra_window_bool = False
 
     def update(self, s: Settings, v: Video) -> int:
+        """
+        Updates the images in the frames and the values in the edge detection variables
+        :param s: Settings object for the edge detection variables
+        :type s: Settings
+        :param v: Video object with all the frames that needs to be drawn
+        :type v: Video
+        :return: 0 if the main program doesn't need to do anything
+        :return: 1 if the "exit" button or the close button is pressed
+        :return: 2 if the extra window needs to be rendered
+        :return: 3 if the ëxit"button or the close button of the extra window is pressed
+        :rtype: int
+        """
         self._event, self._values = self._window.read(timeout=20)
         if self._extra_window_bool:
             self._event_extra, self._values_extra = self._extra_window.read(timeout=20)
@@ -136,6 +165,13 @@ class Ui:
         return 0
 
     def _update_layout(self, s) -> bool:
+        """
+        simple check if the layout needs to be updated
+        :param s: Settings used for edge_detection_type
+        :return: True if it needs to be updated
+        :return: False if it is not needed
+        :rtype: bool
+        """
         if self._values['-DETECTION TYPE-'] == 'Threshold Detection' and s.edge_detection_type != 1:
             s.edge_detection_type = 1
             return True
@@ -151,7 +187,14 @@ class Ui:
         else:
             return False
 
-    def _update_extra_window(self, s):
+    def _update_extra_window(self, s) -> None:
+        """
+        Saves the values changed using the sliders in de Settings object
+        :param s: Settings object used to store detection values
+        :type s: Settings
+        :return: None
+        :rtype: None
+        """
         # TODO: create update fields
         if s.edge_detection_type == 1:
             s.contour_threshold_A = self._values_extra['-SLIDER WINDOW 2 A-']
@@ -174,9 +217,16 @@ class Ui:
         elif s.edge_detection_type == 0:
             s.canny_threshold_A = self._values_extra['-SLIDER WINDOW 2 A-']
             s.canny_threshold_B = self._values_extra['-SLIDER WINDOW 2 B-']
-        return True
 
-    def _update_extra_layout(self, s):
+    def _update_extra_layout(self, s) -> bool:
+        """
+        Changes the layout of the extra window
+        :param s: Settings object used to check edge_detecion_type for which layout needed
+        :type s: Settings
+        :return: True if it needs updating
+        :return: False if ti doesn't need updating
+        :rtype: bool
+        """
         if self._values['-DETECTION TYPE-'] == 'Threshold Detection' and s.edge_detection_type != 1:
             s.edge_detection_type = 1
             self._extra_window['-DETECTION TYPE TEXT-'].update(value='Threshold Detection')
@@ -296,7 +346,16 @@ class Ui:
         else:
             return False
 
-    def _update_img(self, s: Settings, v: Video):
+    def _update_img(self, s: Settings, v: Video) -> None:
+        """
+        Updates the images used in the main window
+        :param s: Settings used for image height and image width
+        :type s: Settings
+        :param v: Video object with the needed frames
+        :type v: Video
+        :return: None
+        :rtype: None
+        """
         normal_view = cv.resize(v.frame, (s.image_width, s.image_height))
         output_view = cv.resize(v.video_output, (s.image_width, s.image_height))
         imgbytes_normal = cv.imencode('.png', normal_view)[1].tobytes()
@@ -305,6 +364,15 @@ class Ui:
         self._window['-IMAGE OUTPUT-'].update(data=imgbytes_output, size=(s.image_width, s.image_height))
 
     def _update_extra_img(self, s: Settings, v: Video):
+        """
+        Updates the images used in the detection window
+        :param s: Settings used for image height and image width
+        :type s: Settings
+        :param v: Video object with the needed frames
+        :type v: Video
+        :return: None
+        :rtype: None
+        """
         if s.edge_detection_type == 1:
             window2_view = cv.resize(v.thrash, (s.image_width, s.image_height))
         elif s.edge_detection_type == 2:
@@ -325,7 +393,7 @@ class Ui:
         elif s.edge_detection_type == 3:
             window2_view = cv.resize(v.blob, (s.image_width, s.image_height))
             window3_view = cv.resize(v.canny, (s.image_width, s.image_height))
-            window4_view = cv.resize(v.dilatem, (s.image_width, s.image_height))
+            window4_view = cv.resize(v.dilate, (s.image_width, s.image_height))
         elif s.edge_detection_type == 0:
             window2_view = cv.resize(v.canny, (s.image_width, s.image_height))
         else:
@@ -343,13 +411,22 @@ class Ui:
             imgbytes_window4 = cv.imencode('.png', window4_view)[1].tobytes()
             self._extra_window['-WINDOW 4-'].update(data=imgbytes_window4, size=(s.image_width, s.image_height))
 
-    def del_extra_window(self):
+    def del_extra_window(self) -> None:
+        """
+        Cleans up the created extra window
+        :return: None
+        :rtype: None
+        """
         self._extra_window.close()
         self._extra_window_bool = False
         self._extra_window = None
         self.extra_layout = None
 
     def __del__(self) -> int:
+        """
+        Cleans up the main window
+        :return: 0
+        """
         self._window.close()
         if self._extra_window is not None:
             self._extra_window.close()

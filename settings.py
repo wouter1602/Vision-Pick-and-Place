@@ -34,6 +34,10 @@ class Settings:
     image_width: int
 
     def __init__(self) -> None:
+        """
+        Tries to open settings.json if no settings.json exist it wil create one with default values.
+        If it can open settings.json reads all the variables stored in it.
+        """
         # Get ABS path of settings file so it can be run outside of dir
         setting_file = os.path.dirname(__file__) + "/settings.json"
         try:
@@ -76,6 +80,10 @@ class Settings:
         self.autodetect = self._json_obj['display_output']['autodetect']
 
     def __create_json(self) -> int:
+        """
+        Creates settings.json dict with default values and saves this dict as an json
+        :return: 0 if it was successful -2 if it failed
+        """
         self._json_obj = {
             'verbose': False,
             'capture_device': "/dev/video0",
@@ -121,6 +129,10 @@ class Settings:
         return self.save_jason()
 
     def update_json(self) -> int:
+        """
+        Updates the settings.json with the newest data changed by the program and saves it.
+        :return: 0 if successful -2 if failed
+        """
         self._json_obj['verbose'] = self.verbose
         self._json_obj['capture_device'] = self.capture_device
         self._json_obj['webcam_settings']['frame_width'] = self.frame_width
@@ -160,6 +172,10 @@ class Settings:
         return self.save_jason()
 
     def save_jason(self) -> int:
+        """
+        Saves the the json_obj dict as an json in settings.json
+        :return: 0 if successful -2 if failed
+        """
         try:
             with open('./settings.json', 'w') as jsonFile:
                 json.dump(self._json_obj, jsonFile, indent=4)
@@ -170,6 +186,10 @@ class Settings:
         return 0
 
     def __del__(self) -> int:
+        """
+        Saves the new variables to the json file before closing the program
+        :return: 0 if successful -2 if failed.
+        """
         if self.verbose:
             print("Closing Settings file")
         if self.update_json() != 0:
