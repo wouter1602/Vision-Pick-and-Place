@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 from typing import Union, Tuple
 
-import cv2 as cv
 import numpy as np
+import cv2 as cv
 
-from video import Video
 from settings import Settings
 
 
@@ -35,6 +34,7 @@ class Markers:
         return marker_frame, img_corners, ids
 
     def remove_warp(self, s: Settings, img: np.ndarray):
+        # TODO: rotate frame using markers
         height, width = img.shape[:2]
 
         perspective_dst = np.float32([(width, 0),

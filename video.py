@@ -1,6 +1,7 @@
 # Video Class with all the object recognition functions
 
 from settings import Settings
+from markers import Markers
 
 from typing import List, Union
 import cv2 as cv
@@ -30,8 +31,12 @@ class Video:
         """
         if s.use_test_image:
             # If defined in the Settings object the program wil use a static test image for testing purposes
-            self._cap = cv.imread(s.test_image)
-            self.frame = cv.imread(s.test_image)
+            # self._cap = cv.imread(s.test_image_path)
+            # self.frame = cv.imread(s.test_image_path)
+            path = s.test_image_path + "/01.JPG"
+            self._cap = cv.imread(path)
+            self.frame = cv.imread(path)
+            self.__test_image_counter__ += 1
         else:
             self._cap = cv.VideoCapture(s.capture_device)
             self._cap.set(cv.CAP_PROP_FRAME_WIDTH, s.frame_width)
@@ -328,8 +333,10 @@ class Video:
         :type s: Settings
         :return: None
         """
+        m = Markers(s)
         self.frame = self._get_video(s, self._cap)
-        self.grayscale = self._convert_to_grayscale(self.frame)
+        marker_frame, warped_frame = m.remove_warp(s, self.frame)
+        self.grayscale = self._convert_to_grayscale(warped_frame)
         width, height = self.frame.shape[0:2]
 
         if s.edge_detection_type == 1:  # Only threshold detection
@@ -343,7 +350,7 @@ class Video:
             self.erode = self._erode_edges(self.dilate, iterations=s.erode_iterations)
             self.blur = self._blur_edges(s, self.erode)
             contours = self._edge_contour(self.blur)
-            self.video_output = self._draw_contour(s, self.frame, contours)
+            self.video_output = self._draw_contour(s, warped_frame, contours)
             cv.imwrite('./output.bmp', self.video_output)
         elif s.edge_detection_type == 3:  # Blob + Canny shape detection
             self.blob = self._edge_blob(self.grayscale)
@@ -363,3 +370,5 @@ class Video:
     def __del__(self) -> int:
         # TODO: Create deconstruct
         return 0
+
+    __test_image_counter__ = 1

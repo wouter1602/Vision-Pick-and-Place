@@ -28,7 +28,7 @@ class Settings:
     TCP_IP: str
     TCP_PORT: int
     use_test_image: bool
-    test_image: str
+    test_image_path: str
     autodetect: bool
     image_height: int
     image_width: int
@@ -73,7 +73,7 @@ class Settings:
         self.TCP_IP = self._json_obj['connection']['TCP_IP']
         self.TCP_PORT = self._json_obj['connection']['TCP_PORT']
         self.use_test_image = self._json_obj['use_test_image']
-        self.test_image = self._json_obj['test_image']
+        self.test_image_path = self._json_obj['test_image_path']
         self.display_output = self._json_obj['display_output']['enable']
         self.image_height = self._json_obj['display_output']['image_height']
         self.image_width = self._json_obj['display_output']['image_width']
@@ -117,7 +117,7 @@ class Settings:
                 'TCP_PORT': 5000,
             },
             'use_test_image': False,
-            'test_image': "./Image/Test_Img_Resized.jpg",
+            'test_image': "./Image/01",
             'display_output': {
                 'enable': False,
                 'image_height': 360,
@@ -163,7 +163,7 @@ class Settings:
         self._json_obj['connection']['TCP_PORT'] = self.TCP_PORT
 
         self._json_obj['use_test_image'] = self.use_test_image
-        self._json_obj['test_image'] = self.test_image
+        self._json_obj['test_image_path'] = self.test_image_path
 
         self._json_obj['display_output']['enable'] = self.display_output
         self._json_obj['display_output']['image_height'] = self.image_height

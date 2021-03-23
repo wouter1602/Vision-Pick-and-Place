@@ -32,8 +32,8 @@
         "TCP_IP": "127.0.0.1",
         "TCP_PORT": 5000
     },
-    "use_test_image": false,
-    "test_image": "./Image/Test_frame_1.bmp",
+    "use_test_image": true,
+    "test_image_path": "./Image/01",
     "display_output": {
         "enable": true,
         "image_height": 360,

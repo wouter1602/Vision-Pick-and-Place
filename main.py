@@ -3,7 +3,6 @@
 import numpy as np
 import cv2 as cv
 # import multiprocessing
-# from dataclasses import dataclass
 # import socket
 
 from settings import Settings
@@ -31,9 +30,6 @@ def main() -> None:
             cap.detect_objects(s)
 
         # cv.imwrite('./frame.bmp', cap.frame)
-        # cv.imwrite('./blank.bmp', cap.blank)
-        cv.imwrite('./frame.bmp', cap.frame)
-        # cv.waitKey(1)
 
         if s.display_output:
             status_code = win.update(s, cap)

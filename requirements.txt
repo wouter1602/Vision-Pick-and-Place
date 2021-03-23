@@ -1,3 +1,4 @@
-numpy==1.19.4
-opencv-python==4.4.0.46
-PySimpleGUI==4.32.1
+numpy==1.20.1
+opencv-contrib-python==4.5.1.48
+opencv-python==4.5.1.48
+PySimpleGUI==4.38.0
