@@ -196,8 +196,8 @@ class Video:
 
             x_center = x_high - x_low
             y_center = y_high - y_low
-            if Video._check_pixel(video_output, s.triangle_1, x_center, y_center, 5):
-                print("Good")
+            # if Video._check_pixel(video_output, s.triangle_1, x_center, y_center, 5):
+            #     print("Good")
             if len(approx) == 3:
                 cv.putText(video_output, "Triangle", (x, y), cv.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0))
                 cv.drawContours(video_output, [approx], 0, (0, 0, 255), 2)
